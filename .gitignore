@@ -1,12 +1,13 @@
 .vs/
+.vscode/
 bin/
 obj/
-*.exe
-*.obj
+*.user
 *.dll
+*.exe
 *.lib
 *.a
 *.so
 *.dylib
 *.pdb
-*.user
+
