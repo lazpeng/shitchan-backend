@@ -36,7 +36,7 @@ namespace shitchan.Repositories.PostgreSQL
         {
             using var conn = await GetConnection();
 
-            var query = "SELECT Board, Id as ParentPostId, POSTED as TimestampCreated, (select max(POSTED) from POSTS p where p.PARENT = ID OR p.ID = ID) as TimestampUpdated from POSTS where Board = @Board";
+            var query = "SELECT Board, Id as ParentPostId, POSTED as TimestampCreated, (select max(POSTED) from POSTS p where p.PARENT = ID OR p.ID = ID) as TimestampUpdated from POSTS where Board = @Board ORDER BY TimestampUpdated";
 
             var threads = await conn.QueryAsync<Thread>(query, new { Board });
             foreach(var thread in threads)

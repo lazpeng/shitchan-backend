@@ -31,6 +31,12 @@ namespace shitchan.Controllers
             return Ok(await threadRepository.RefreshThread(threadId, lastNumber ?? 0));
         }
 
+        [HttpGet("{threadId}")]
+        public async Task<IActionResult> Get(long threadId)
+        {
+            return Ok(await threadRepository.Get(threadId));
+        }
+
         [HttpPost("{board}")]
         public async Task<IActionResult> NewThread(string board, [FromBody] Post parent)
         {
