@@ -49,6 +49,7 @@ namespace shitchan
                 case "POSTGRESQL":
                     services.AddScoped<IBoardRepository, Repositories.PostgreSQL.BoardRepository>();
                     services.AddScoped<IThreadRepository, Repositories.PostgreSQL.ThreadRepository>();
+                    services.AddScoped<IAdminRepository, Repositories.PostgreSQL.AdminRepository>();
                     break;
                 default:
                     throw new NotImplementedException();

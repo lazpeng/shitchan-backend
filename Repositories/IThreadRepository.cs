@@ -13,5 +13,6 @@ namespace shitchan.Repositories
         Task<List<Post>> RefreshThread(long ThreadParentId, long LastNumber);
         Task<Thread> Get(long ParentPostId);
         Task<Thread> CreateThread(Post ParentPost);
+        Task DeletePost(long Id);
     }
 }

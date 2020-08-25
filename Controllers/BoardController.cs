@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using shitchan.Entities;
 using shitchan.Repositories;
 
 namespace shitchan.Controllers
@@ -12,10 +13,12 @@ namespace shitchan.Controllers
     public class BoardController : Controller
     {
         private readonly IBoardRepository boardRepository;
+        private readonly IAdminRepository adminRepository;
 
-        public BoardController(IBoardRepository repo)
+        public BoardController(IBoardRepository boardRepo, IAdminRepository adminRepo)
         {
-            boardRepository = repo;
+            boardRepository = boardRepo;
+            adminRepository = adminRepo;
         }
 
         [HttpGet]
@@ -36,6 +39,20 @@ namespace shitchan.Controllers
             {
                 return NotFound();
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] BoardRegister board)
+        {
+            var admin = await adminRepository.ValidateToken(board.Token);
+
+            if(admin == null)
+            {
+                return Forbid();
+            }
+
+            var result = await boardRepository.Create(board, admin.Id);
+            return Created(result.Route, result);
         }
     }
 }

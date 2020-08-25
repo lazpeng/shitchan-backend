@@ -13,10 +13,12 @@ namespace shitchan.Controllers
     public class ThreadController : Controller
     {
         private readonly IThreadRepository threadRepository;
+        private readonly IAdminRepository adminRepository;
 
-        public ThreadController(IThreadRepository repo)
+        public ThreadController(IThreadRepository threadRepo, IAdminRepository adminRepo)
         {
-            threadRepository = repo;
+            threadRepository = threadRepo;
+            adminRepository = adminRepo;
         }
 
         [HttpGet("board/{board}")]
@@ -52,6 +54,21 @@ namespace shitchan.Controllers
             }
 
             return Created(created.Id.ToString(), created);
+        }
+
+        [HttpDelete("{postId}")]
+        public async Task<IActionResult> Delete(long postId, [FromBody] string token)
+        {
+            var admin = await adminRepository.ValidateToken(token);
+
+            if(admin == null)
+            {
+                return Forbid();
+            }
+
+            await threadRepository.DeletePost(postId);
+
+            return Ok();
         }
     }
 }

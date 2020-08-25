@@ -17,7 +17,7 @@ namespace shitchan.Repositories.PostgreSQL
         {
             using var conn = await GetConnection();
 
-            var query = "INSERT INTO POSTS (TITLE, BOARD, AUTHOR, POSTED, CONTENT, HASH, PARENT) VALUES (@Title, @Board, @Author, @Timestamp, @Content, @AuthorHash, @ParentPostId) RETURNING ID";
+            var query = "INSERT INTO POSTS (TITLE, BOARD, AUTHOR, POSTED, CONTENT, HASH, PARENT, FILENAME, FILEDATA) VALUES (@Title, @Board, @Author, @Timestamp, @Content, @AuthorHash, @ParentPostId, @PictureFilename, decode(@PictureBase64, 'base64')) RETURNING ID";
 
             content.Id = conn.ExecuteScalar<long>(query, content);
             return content;
@@ -61,9 +61,18 @@ namespace shitchan.Repositories.PostgreSQL
         {
             using var conn = await GetConnection();
 
-            var query = "SELECT Id, Title, Author, POSTED as Timestamp, Board, HASH as AuthorHash, Content, PARENT as ParentPostId FROM POSTS WHERE (PARENT = @ThreadParentId OR ID = @ThreadParentId) AND ID > @LastNumber";
+            var query = "SELECT Id, Title, Author, POSTED as Timestamp, Board, HASH as AuthorHash, Content, PARENT as ParentPostId, FILENAME as PictureFilename, encode(FILEDATA, 'base64') as PictureBase64 FROM POSTS WHERE (PARENT = @ThreadParentId OR ID = @ThreadParentId) AND ID > @LastNumber";
 
             return (await conn.QueryAsync<Post>(query, new { ThreadParentId, LastNumber })).ToList();
+        }
+
+        public async Task DeletePost(long Id)
+        {
+            using var conn = await GetConnection();
+
+            var query = "DELETE FROM POSTS WHERE ID = @Id";
+
+            await conn.ExecuteAsync(query, new { Id });
         }
     }
 }
