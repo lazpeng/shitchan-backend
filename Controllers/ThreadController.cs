@@ -19,7 +19,7 @@ namespace shitchan.Controllers
             threadRepository = repo;
         }
 
-        [HttpGet("{board}")]
+        [HttpGet("board/{board}")]
         public async Task<IActionResult> GetThreads(string board)
         {
             return Ok(await threadRepository.GetThreads(board));
