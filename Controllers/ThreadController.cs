@@ -37,18 +37,19 @@ namespace shitchan.Controllers
             return Ok(await threadRepository.Get(threadId));
         }
 
-        [HttpPost("{board}")]
-        public async Task<IActionResult> NewThread(string board, [FromBody] Post parent)
-        {
-            var created = await threadRepository.CreateThread(board, parent);
-
-            return Created(created.ParentPostId.ToString(), created);
-        }
-
         [HttpPost]
-        public async Task<IActionResult> NewReply([FromBody] Post reply)
+        public async Task<IActionResult> Post([FromBody] Post post)
         {
-            var created = await threadRepository.CreatePost(reply);
+            Post created;
+
+            if(post.ParentPostId != null)
+            {
+                created = await threadRepository.CreatePost(post);
+            } else
+            {
+                var thread = await threadRepository.CreateThread(post);
+                created = thread.Children[0];
+            }
 
             return Created(created.Id.ToString(), created);
         }

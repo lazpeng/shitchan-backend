@@ -23,10 +23,8 @@ namespace shitchan.Repositories.PostgreSQL
             return content;
         }
 
-        public async Task<Thread> CreateThread(string Board, Post ParentPost)
+        public async Task<Thread> CreateThread(Post ParentPost)
         {
-            ParentPost.Board = Board;
-
             var created = await CreatePost(ParentPost);
 
             return await Get(created.Id);

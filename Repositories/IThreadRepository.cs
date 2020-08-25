@@ -12,6 +12,6 @@ namespace shitchan.Repositories
         Task<Post> CreatePost(Post content);
         Task<List<Post>> RefreshThread(long ThreadParentId, long LastNumber);
         Task<Thread> Get(long ParentPostId);
-        Task<Thread> CreateThread(string Board, Post ParentPost);
+        Task<Thread> CreateThread(Post ParentPost);
     }
 }
