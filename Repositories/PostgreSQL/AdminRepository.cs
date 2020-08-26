@@ -19,7 +19,7 @@ namespace shitchan.Repositories.PostgreSQL
         {
             using var conn = await GetConnection();
 
-            var query = "SELECT ID, USER, DATEREGISTERED as RegisteredTimestamp FROM ADMINS";
+            var query = "SELECT ID, USERNAME, DATEREGISTERED as RegisteredTimestamp FROM ADMINS";
 
             return await conn.QuerySingleAsync<Admin>(query, new { Id });
         }
@@ -80,9 +80,9 @@ namespace shitchan.Repositories.PostgreSQL
             var Hash = HashPassword(Target.Password, Salt);
             var Registered = DateTimeOffset.Now.ToUnixTimeSeconds();
 
-            var query = "INSERT INTO ADMINS (USER, PASSWORDHASH, PASSWORDSALT, DATEREGISTERED) VALUES (@User, @Hash, @Salt, @Registered) RETURNING ID";
+            var query = "INSERT INTO ADMINS (USERNAME, PASSWORDHASH, PASSWORDSALT, DATEREGISTERED) VALUES (@Username, @Hash, @Salt, @Registered) RETURNING ID";
 
-            var id = await conn.ExecuteScalarAsync<long>(query, new { Target.User, Hash, Salt, Registered });
+            var id = await conn.ExecuteScalarAsync<long>(query, new { Target.Username, Hash, Salt, Registered });
 
             return await Get(id);
         }

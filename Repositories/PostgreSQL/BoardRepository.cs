@@ -28,7 +28,7 @@ namespace shitchan.Repositories.PostgreSQL
         {
             using var conn = await GetConnection();
 
-            var query = "SELECT ROUTE, TITLE, DESCRIPTION, a.USER AS CreatedBy FROM BOARDS INNER JOIN ADMINS a ON a.ID = CREATEDBY WHERE ROUTE = @URL";
+            var query = "SELECT ROUTE, TITLE, DESCRIPTION, a.USERNAME AS CreatedBy FROM BOARDS INNER JOIN ADMINS a ON a.ID = CREATEDBY WHERE ROUTE = @URL";
 
             return await conn.QuerySingleAsync<Board>(query, new { URL = Url });
         }
@@ -37,7 +37,7 @@ namespace shitchan.Repositories.PostgreSQL
         {
             using var conn = await GetConnection();
 
-            var query = "SELECT ROUTE, TITLE, DESCRIPTION, a.USER AS CreatedBy FROM BOARDS INNER JOIN ADMINS a ON a.ID = CREATEDBY";
+            var query = "SELECT ROUTE, TITLE, DESCRIPTION, a.USERNAME AS CreatedBy FROM BOARDS INNER JOIN ADMINS a ON a.ID = CREATEDBY";
 
             return (await conn.QueryAsync<Board>(query)).ToList();
         }
