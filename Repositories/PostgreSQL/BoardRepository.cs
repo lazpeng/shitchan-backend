@@ -13,13 +13,13 @@ namespace shitchan.Repositories.PostgreSQL
         {
         }
 
-        public async Task<Board> Create(Board board, long CreatedBy)
+        public async Task<Board> Create(Board board)
         {
             using var conn = await GetConnection();
 
-            var query = "INSERT INTO BOARDS (ROUTE, TITLE, DESCRIPTION, CREATEDBY) VALUES (@Route, @Title, @Description, @CreatedBy)";
+            var query = "INSERT INTO BOARDS (ROUTE, TITLE, DESCRIPTION) VALUES (@Route, @Title, @Description)";
 
-            await conn.ExecuteAsync(query, new { board.Route, board.Title, board.Description, CreatedBy });
+            await conn.ExecuteAsync(query, new { board.Route, board.Title, board.Description });
 
             return await Get(board.Route);
         }
@@ -28,7 +28,7 @@ namespace shitchan.Repositories.PostgreSQL
         {
             using var conn = await GetConnection();
 
-            var query = "SELECT ROUTE, TITLE, DESCRIPTION, a.USERNAME AS CreatedBy FROM BOARDS INNER JOIN ADMINS a ON a.ID = CREATEDBY WHERE ROUTE = @URL";
+            var query = "SELECT ROUTE, TITLE, DESCRIPTION,FROM BOARDS WHERE ROUTE = @URL";
 
             return await conn.QuerySingleAsync<Board>(query, new { URL = Url });
         }
@@ -37,7 +37,7 @@ namespace shitchan.Repositories.PostgreSQL
         {
             using var conn = await GetConnection();
 
-            var query = "SELECT ROUTE, TITLE, DESCRIPTION, a.USERNAME AS CreatedBy FROM BOARDS INNER JOIN ADMINS a ON a.ID = CREATEDBY";
+            var query = "SELECT ROUTE, TITLE, DESCRIPTION FROM BOARDS";
 
             return (await conn.QueryAsync<Board>(query)).ToList();
         }

@@ -10,6 +10,6 @@ namespace shitchan.Repositories
     {
         Task<List<Board>> GetBoards();
         Task<Board> Get(string Url);
-        Task<Board> Create(Board board, long CreatedBy);
+        Task<Board> Create(Board board);
     }
 }

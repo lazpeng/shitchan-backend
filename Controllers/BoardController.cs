@@ -51,7 +51,7 @@ namespace shitchan.Controllers
                 return Forbid();
             }
 
-            var result = await boardRepository.Create(board, admin.Id);
+            var result = await boardRepository.Create(board);
             return Created(result.Route, result);
         }
     }
