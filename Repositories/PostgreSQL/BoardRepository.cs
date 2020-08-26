@@ -28,7 +28,7 @@ namespace shitchan.Repositories.PostgreSQL
         {
             using var conn = await GetConnection();
 
-            var query = "SELECT ROUTE, TITLE, DESCRIPTION,FROM BOARDS WHERE ROUTE = @URL";
+            var query = "SELECT ROUTE, TITLE, DESCRIPTION FROM BOARDS WHERE ROUTE = @URL";
 
             return await conn.QuerySingleAsync<Board>(query, new { URL = Url });
         }
