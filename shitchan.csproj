@@ -6,10 +6,12 @@
 
   <ItemGroup>
     <None Remove="Repositories\PostgreSQL\Scripts\v0.sql" />
+    <None Remove="Repositories\PostgreSQL\Scripts\v1.sql" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Repositories\PostgreSQL\Scripts\v0.sql" />
+    <EmbeddedResource Include="Repositories\PostgreSQL\Scripts\v1.sql" />
   </ItemGroup>
 
   <ItemGroup>
