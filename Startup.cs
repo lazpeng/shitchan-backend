@@ -16,8 +16,6 @@ namespace shitchan
 {
     public class Startup
     {
-        private readonly string CorsPolicy = "CORS";
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -31,10 +29,10 @@ namespace shitchan
             services.AddControllers();
             services.AddCors(options =>
                 {
-                    options.AddPolicy(name: CorsPolicy,
+                    options.AddDefaultPolicy(
                               builder =>
                               {
-                                  builder.AllowAnyOrigin();
+                                  builder.WithOrigins("https://lazpeng.github.io", "https://localhost");
                                   builder.AllowAnyMethod();
                                   builder.AllowAnyHeader();
                               });
@@ -68,7 +66,9 @@ namespace shitchan
 
             app.UseRouting();
 
-            app.UseCors(CorsPolicy);
+            app.UseCors();
+
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
