@@ -37,7 +37,7 @@ namespace shitchan.Repositories.PostgreSQL
         {
             using var conn = await GetConnection();
 
-            var query = "SELECT ROUTE, TITLE, DESCRIPTION FROM BOARDS";
+            var query = "SELECT ROUTE, TITLE, DESCRIPTION FROM BOARDS ORDER BY ROUTE ASC";
 
             return (await conn.QueryAsync<Board>(query)).ToList();
         }

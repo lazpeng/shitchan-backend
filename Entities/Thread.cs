@@ -11,6 +11,8 @@ namespace shitchan.Entities
         public long ParentPostId { get; set; }
         public long TimestampCreated { get; set; }
         public long TimestampUpdated { get; set; }
+        public bool Stickied { get; set; }
         public List<Post> Children { get; set; }
+        public int NumberOfPosts { get; set; }
     }
 }

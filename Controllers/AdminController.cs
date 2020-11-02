@@ -20,32 +20,21 @@ namespace shitchan.Controllers
             adminRepository = repository;
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] Admin admin)
+        [HttpGet("{code}")]
+        public async Task<IActionResult> Validate(string code)
         {
-            var result = await adminRepository.Login(admin);
-
-            if(string.IsNullOrEmpty(result))
-            {
-                return NotFound();
-            } else
-            {
-                return Ok(result);
-            }
+            return Ok(await adminRepository.ValidateCode(code));
         }
 
-        [HttpPost("{invite}")]
-        public async Task<IActionResult> Register(string invite, [FromBody] Admin admin)
+        [HttpPut("{oldCode}")]
+        public async Task<IActionResult> Update(string oldCode, [FromBody] string newCode)
         {
-            var result = await adminRepository.Register(invite, admin);
+            var result = await adminRepository.UpdateCode(oldCode, newCode);
 
-            if(result != null)
+            if(result)
             {
-                return Ok(result);
-            } else
-            {
-                return Forbid();
-            }
+                return Created(newCode, newCode);
+            } else return NotFound();
         }
     }
 }

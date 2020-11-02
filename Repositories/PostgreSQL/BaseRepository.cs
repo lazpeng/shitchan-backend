@@ -20,7 +20,7 @@ namespace shitchan.Repositories.PostgreSQL
             PerformUpgrade().Wait();
         }
 
-        public long LatestDatabaseVersion { get; } = 2;
+        public long LatestDatabaseVersion { get; } = 1;
 
         private string GetUpgradeScript(long version)
         {

@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 
 namespace shitchan.Entities
 {
-    public class BoardRegister : Board
+    public class StickyThreadRequest
     {
+        public long PostNumber { get; set; }
         public string Code { get; set; }
     }
 }

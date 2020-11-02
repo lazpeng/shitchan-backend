@@ -1,10 +1,4 @@
 ﻿using Dapper;
-using shitchan.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace shitchan.Repositories.PostgreSQL
@@ -15,93 +9,18 @@ namespace shitchan.Repositories.PostgreSQL
         {
         }
 
-        public async Task<Admin> Get(long Id)
+        public async Task<bool> ValidateCode(string code)
         {
             using var conn = await GetConnection();
 
-            var query = "SELECT ID, USERNAME, DATEREGISTERED as RegisteredTimestamp FROM ADMINS";
-
-            return await conn.QuerySingleAsync<Admin>(query, new { Id });
+            return (await conn.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM CODES WHERE CODE = @code", new { code })) > 0;
         }
 
-        private string HashPassword(string password, string salt)
-        {
-            var hasher = SHA256.Create();
-            return Encoding.UTF8.GetString(hasher.ComputeHash(Encoding.UTF8.GetBytes(password + salt)));
-        }
-
-        private string GenerateUUID()
-        {
-            return Guid.NewGuid().ToString();
-        }
-
-        public async Task<string> Login(Admin Target)
+        public async Task<bool> UpdateCode(string oldCode, string newCode)
         {
             using var conn = await GetConnection();
 
-            string Token = null;
-
-            string PasswordHash = "", PasswordSalt = "";
-
-            var query = "SELECT PASSWORDHASH, PASSWORDSALT FROM ADMINS WHERE ID = @Id";
-
-            var reader = await conn.ExecuteReaderAsync(query, new { Target.Id });
-            if(reader.Read())
-            {
-                PasswordHash = reader.GetString(reader.GetOrdinal("PASSWORDHASH"));
-                PasswordSalt = reader.GetString(reader.GetOrdinal("PASSWORDSALT"));
-
-                reader.Close();
-
-                var ComputedHash = HashPassword(Target.Password, PasswordSalt);
-
-                if(PasswordHash == ComputedHash)
-                {
-                    query = "DELETE FROM SESSIONS WHERE ADMIN = @Id";
-
-                    await conn.ExecuteAsync(query, new { Target.Id });
-
-                    Token = GenerateUUID();
-
-                    query = "INSERT INTO SESSIONS (TOKEN, ADMIN) VALUES (@Token, @Id)";
-
-                    await conn.ExecuteAsync(query, new { Token, Target.Id });
-                }
-            }
-
-            return Token;
-        }
-
-        public async Task<Admin> Register(string Invite, Admin Target)
-        {
-            using var conn = await GetConnection();
-
-            var Salt = GenerateUUID();
-            var Hash = HashPassword(Target.Password, Salt);
-            var Registered = DateTimeOffset.Now.ToUnixTimeSeconds();
-
-            var query = "INSERT INTO ADMINS (USERNAME, PASSWORDHASH, PASSWORDSALT, DATEREGISTERED) VALUES (@Username, @Hash, @Salt, @Registered) RETURNING ID";
-
-            var id = await conn.ExecuteScalarAsync<long>(query, new { Target.Username, Hash, Salt, Registered });
-
-            return await Get(id);
-        }
-
-        public async Task<Admin> ValidateToken(string Token)
-        {
-            using var conn = await GetConnection();
-
-            var query = "SELECT ADMIN FROM SESSIONS WHERE TOKEN = @Token";
-
-            var id = await conn.ExecuteScalarAsync<long?>(query, new { Token });
-
-            if(id != null)
-            {
-                return await Get(id.Value);
-            } else
-            {
-                return null;
-            }
+            return (await conn.ExecuteAsync("UPDATE CODES SET CODE = @newCode WHERE CODE = @oldCode", new { oldCode, newCode })) > 0;
         }
     }
 }

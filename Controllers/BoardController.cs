@@ -44,11 +44,9 @@ namespace shitchan.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] BoardRegister board)
         {
-            var admin = await adminRepository.ValidateToken(board.Token);
-
-            if(admin == null)
+            if(!await adminRepository.ValidateCode(board.Code))
             {
-                return Forbid();
+                return BadRequest();
             }
 
             var result = await boardRepository.Create(board);

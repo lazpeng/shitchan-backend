@@ -17,7 +17,7 @@ namespace shitchan.Repositories.PostgreSQL
         {
             using var conn = await GetConnection();
 
-            var query = "INSERT INTO POSTS (TITLE, BOARD, AUTHOR, POSTED, CONTENT, HASH, PARENT, FILENAME, FILEDATA) VALUES (@Title, @Board, @Author, @Timestamp, @Content, @AuthorHash, @ParentPostId, @PictureFilename, decode(@PictureBase64, 'base64')) RETURNING ID";
+            var query = "INSERT INTO POSTS (TITLE, BOARD, AUTHOR, POSTED, CONTENT, AUTHORHASH, PARENTPOSTID, PICTUREFILENAME, FILEDATA) VALUES (@Title, @Board, @Author, @Posted, @Content, @AuthorHash, @ParentPostId, @PictureFilename, decode(@PictureBase64, 'base64')) RETURNING ID";
 
             content.Id = conn.ExecuteScalar<long>(query, content);
             return content;
@@ -34,12 +34,40 @@ namespace shitchan.Repositories.PostgreSQL
         {
             using var conn = await GetConnection();
 
-            var query = "SELECT Board, Id as ParentPostId, POSTED as TimestampCreated, (select max(POSTED) from POSTS p where p.PARENT = ID OR p.ID = ID) as TimestampUpdated from POSTS where Board = @Board AND PARENT IS NULL ORDER BY TimestampUpdated DESC";
+            var query = @"
+                        (SELECT t.Board,
+                                 t.Id as ParentPostId,
+                                 t.POSTED as TimestampCreated,
+                                 COALESCE((select max(POSTED) from POSTS p where p.PARENTPOSTID = t.ID), t.POSTED) as TimestampUpdated,
+                                 (select count(*) from POSTS where PARENTPOSTID = t.ID) as NumberOfPosts,
+                                 STICKIED
+                        from POSTS t where Board = @Board AND PARENTPOSTID IS NULL AND STICKIED = TRUE AND HIDDEN = FALSE ORDER BY 4 DESC)
+                        UNION ALL
+                        (SELECT t.Board,
+                                 t.Id as ParentPostId,
+                                 t.POSTED as TimestampCreated,
+                                 COALESCE((select max(POSTED) from POSTS p where p.PARENTPOSTID = t.ID), t.POSTED) as TimestampUpdated,
+                                 (select count(*) from POSTS where PARENTPOSTID = t.ID) as NumberOfPosts,
+                                 STICKIED
+                        from POSTS t where Board = @Board AND PARENTPOSTID IS NULL AND STICKIED = FALSE AND HIDDEN = FALSE ORDER BY 4 DESC)";
 
             var threads = await conn.QueryAsync<Thread>(query, new { Board });
-            foreach(var thread in threads)
+
+            var latestPostsQuery = @"
+            (SELECT Id, Title, Author, POSTED, Board, AuthorHash, Content, ParentPostId, PictureFilename, encode(FILEDATA, 'base64') as PictureBase64, Stickied
+            FROM POSTS
+            WHERE PARENTPOSTID = @ThreadParentId
+            ORDER BY POSTED DESC
+            LIMIT 3)
+            UNION ALL
+            (SELECT Id, Title, Author, POSTED, Board, AuthorHash, Content, ParentPostId, PictureFilename, encode(FILEDATA, 'base64') as PictureBase64, Stickied
+            FROM POSTS
+            WHERE ID = @ThreadParentId)
+            ";
+
+            foreach (var thread in threads)
             {
-                thread.Children = await RefreshThread(thread.ParentPostId, -1);
+                thread.Children = (await conn.QueryAsync<Post>(latestPostsQuery, new { ThreadParentId = thread.ParentPostId })).Reverse().ToList();
             }
 
             return threads.ToList();
@@ -49,7 +77,7 @@ namespace shitchan.Repositories.PostgreSQL
         {
             using var conn = await GetConnection();
 
-            var query = "SELECT Board, Id as ParentPostId, POSTED as TimestampCreated, (select max(POSTED) from POSTS where PARENT = @Parent) as TimestampUpdated from POSTS where ID = @Parent";
+            var query = "SELECT Board, ID as ParentPostId, POSTED as TimestampCreated, (select count(*) from POSTS where PARENTPOSTID = @Parent) as NumberOfPosts, (select max(POSTED) from POSTS where PARENTPOSTID = @Parent) as TimestampUpdated from POSTS where ID = @Parent";
 
             var thread = await conn.QuerySingleAsync<Thread>(query, new { Parent = postId });
             thread.Children = await RefreshThread(postId, -1);
@@ -61,7 +89,7 @@ namespace shitchan.Repositories.PostgreSQL
         {
             using var conn = await GetConnection();
 
-            var query = "SELECT Id, Title, Author, POSTED as Timestamp, Board, HASH as AuthorHash, Content, PARENT as ParentPostId, FILENAME as PictureFilename, encode(FILEDATA, 'base64') as PictureBase64 FROM POSTS WHERE (PARENT = @ThreadParentId OR ID = @ThreadParentId) AND ID > @LastNumber";
+            var query = "SELECT Id, Title, Author, POSTED, Board, AuthorHash, Content, ParentPostId, PictureFilename, encode(FILEDATA, 'base64') as PictureBase64, Stickied FROM POSTS WHERE (PARENTPOSTID = @ThreadParentId OR ID = @ThreadParentId) AND ID > @LastNumber";
 
             return (await conn.QueryAsync<Post>(query, new { ThreadParentId, LastNumber })).ToList();
         }
@@ -73,6 +101,15 @@ namespace shitchan.Repositories.PostgreSQL
             var query = "DELETE FROM POSTS WHERE ID = @Id";
 
             await conn.ExecuteAsync(query, new { Id });
+        }
+
+        public async Task StickThread(long threadNumber, bool stickied)
+        {
+            using var conn = await GetConnection();
+
+            var query = "UPDATE POSTS SET STICKIED = @stickied WHERE ID = @threadNumber";
+
+            await conn.ExecuteAsync(query, new { stickied, threadNumber });
         }
     }
 }

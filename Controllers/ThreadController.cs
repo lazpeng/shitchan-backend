@@ -57,17 +57,27 @@ namespace shitchan.Controllers
         }
 
         [HttpDelete("{postId}")]
-        public async Task<IActionResult> Delete(long postId, [FromBody] string token)
+        public async Task<IActionResult> Delete(long postId, [FromBody] string code)
         {
-            var admin = await adminRepository.ValidateToken(token);
-
-            if(admin == null)
+            if(!await adminRepository.ValidateCode(code))
             {
                 return Forbid();
             }
 
             await threadRepository.DeletePost(postId);
 
+            return Ok();
+        }
+
+        [HttpPut("sticky")]
+        public async Task<IActionResult> SetStickied([FromBody] StickyThreadRequest request, [FromQuery] bool stickied = true)
+        {
+            if(!await adminRepository.ValidateCode(request.Code))
+            {
+                return BadRequest();
+            }
+
+            await threadRepository.StickThread(request.PostNumber, stickied);
             return Ok();
         }
     }

@@ -14,5 +14,6 @@ namespace shitchan.Repositories
         Task<Thread> Get(long ParentPostId);
         Task<Thread> CreateThread(Post ParentPost);
         Task DeletePost(long Id);
+        Task StickThread(long threadId, bool stickied);
     }
 }

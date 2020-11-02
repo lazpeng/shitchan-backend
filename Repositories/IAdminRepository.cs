@@ -8,9 +8,7 @@ namespace shitchan.Repositories
 {
     public interface IAdminRepository
     {
-        Task<Admin> Register(string Invite, Admin Target);
-        Task<string> Login(Admin Target);
-        Task<Admin> ValidateToken(string Token);
-        Task<Admin> Get(long Id);
+        Task<bool> ValidateCode(string code);
+        Task<bool> UpdateCode(string oldCode, string newCode);
     }
 }
