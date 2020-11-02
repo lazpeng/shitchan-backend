@@ -57,7 +57,7 @@ namespace shitchan.Repositories.PostgreSQL
             (SELECT Id, Title, Author, POSTED, Board, AuthorHash, Content, ParentPostId, PictureFilename, encode(FILEDATA, 'base64') as PictureBase64, Stickied
             FROM POSTS
             WHERE PARENTPOSTID = @ThreadParentId
-            ORDER BY POSTED DESC
+            ORDER BY ID DESC
             LIMIT 3)
             UNION ALL
             (SELECT Id, Title, Author, POSTED, Board, AuthorHash, Content, ParentPostId, PictureFilename, encode(FILEDATA, 'base64') as PictureBase64, Stickied
