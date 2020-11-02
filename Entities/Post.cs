@@ -21,7 +21,6 @@ namespace shitchan.Entities
         [MaxLength(36)]
         public string AuthorHash { get; set; }
         public long? ParentPostId { get; set; }
-        [MaxLength(1024)]
         public string PictureBase64 { get; set; }
         [MaxLength(128)]
         public string PictureFilename { get; set; }

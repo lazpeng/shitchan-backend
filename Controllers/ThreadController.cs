@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using shitchan.Entities;
 using shitchan.Repositories;
+using System.Buffers.Text;
+using System.Text;
 
 namespace shitchan.Controllers
 {
@@ -44,6 +46,15 @@ namespace shitchan.Controllers
         {
             Post created;
 
+            if(!string.IsNullOrEmpty(post.PictureBase64))
+            {
+                var maxLength = 1024 * 1024 * 1024; // 1 MB
+                if(Convert.FromBase64String(post.PictureBase64).Length > maxLength)
+                {
+                    return BadRequest("Picture max length exceeded");
+                }
+            }
+
             if(post.ParentPostId != null)
             {
                 created = await threadRepository.CreatePost(post);
@@ -78,6 +89,14 @@ namespace shitchan.Controllers
             }
 
             await threadRepository.StickThread(request.PostNumber, stickied);
+            return Ok();
+        }
+
+        [HttpPost("report")]
+        public async Task<IActionResult> Report([FromBody] long postId)
+        {
+            await threadRepository.ReportPost(postId);
+
             return Ok();
         }
     }

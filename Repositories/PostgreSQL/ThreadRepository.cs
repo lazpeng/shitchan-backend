@@ -111,5 +111,12 @@ namespace shitchan.Repositories.PostgreSQL
 
             await conn.ExecuteAsync(query, new { stickied, threadNumber });
         }
+
+        public async Task ReportPost(long postId)
+        {
+            using var conn = await GetConnection();
+
+            await conn.ExecuteAsync("UPDATE POSTS SET HIDDEN = TRUR WHERE ID = @postId", new { postId });
+        }
     }
 }
