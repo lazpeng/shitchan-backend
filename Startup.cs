@@ -26,23 +26,22 @@ namespace shitchan
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
             services.AddCors(options =>
-                {
-                    options.AddDefaultPolicy(
-                              builder =>
-                              {
-                                  builder.WithOrigins("https://lazpeng.github.io", "https://localhost");
-                                  builder.AllowAnyMethod();
-                                  builder.AllowAnyHeader();
-                              });
-                }
-            );
+            {
+                options.AddDefaultPolicy(
+                          builder =>
+                          {
+                              builder.WithOrigins("https://lazpeng.github.io", "https://localhost");
+                              builder.AllowAnyMethod();
+                              builder.AllowAnyHeader();
+                          });
+            });
+            services.AddControllers();
 
             var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ?? Configuration.GetConnectionString("Local");
             services.AddSingleton(new ConnectionStringProvider(connectionString));
 
-            switch(Configuration.GetValue<string>("Database").ToUpper())
+            switch (Configuration.GetValue<string>("Database").ToUpper())
             {
                 case "POSTGRESQL":
                     services.AddScoped<IBoardRepository, Repositories.PostgreSQL.BoardRepository>();
