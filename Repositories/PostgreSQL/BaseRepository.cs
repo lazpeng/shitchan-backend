@@ -99,7 +99,7 @@ namespace shitchan.Repositories.PostgreSQL
 
         public async Task<IDbConnection> GetConnection()
         {
-            var conn = new NpgsqlConnection(connectionStringProvider.GetConnectionString());
+            var conn = new NpgsqlConnection(connectionStringProvider.ConnectionString);
             await conn.OpenAsync();
 
             return conn;

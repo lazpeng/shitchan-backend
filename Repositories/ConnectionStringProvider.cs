@@ -8,7 +8,7 @@ namespace shitchan.Repositories
 {
     public class ConnectionStringProvider
     {
-        private readonly string ConnectionString;
+        public string ConnectionString { get; private set; }
 
         private string FromHerokuConnectionString(string Conn)
         {
@@ -36,7 +36,5 @@ namespace shitchan.Repositories
             }
             this.ConnectionString = ConnectionString;
         }
-
-        public string GetConnectionString() => ConnectionString;
     }
 }
