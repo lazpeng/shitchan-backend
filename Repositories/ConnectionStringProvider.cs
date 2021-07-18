@@ -24,7 +24,8 @@ namespace shitchan.Repositories
                 Database = databaseUri.LocalPath.TrimStart('/'),
                 Pooling = true,
                 MinPoolSize = 1,
-                MaxPoolSize = 20
+                MaxPoolSize = 20,
+                SslMode = SslMode.Require,
             }.ToString();
         }
 
