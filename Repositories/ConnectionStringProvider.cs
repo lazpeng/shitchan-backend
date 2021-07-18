@@ -26,6 +26,7 @@ namespace shitchan.Repositories
                 MinPoolSize = 1,
                 MaxPoolSize = 20,
                 SslMode = SslMode.Require,
+                TrustServerCertificate = true
             }.ToString();
         }
 
